@@ -1,0 +1,27 @@
+# Core AI Framework
+crewai==0.86.0           # Multi-agent orchestration framework
+crewai-tools==0.17.0     # Pre-built tools for agents
+
+# LLM Provider
+langchain-ollama==0.2.2  # Ollama integration for local LLMs
+ollama==0.4.4            # Python client for Ollama
+
+# Data Models & Validation
+pydantic==2.10.5         # Data validation and settings management
+pydantic-settings==2.7.1 # Environment-based configuration
+
+# Web Frameworks (for later phases)
+fastapi==0.115.12        # Backend API framework
+uvicorn==0.34.0          # ASGI server for FastAPI
+streamlit==1.41.1        # Frontend UI framework
+
+# Utilities
+python-dotenv==1.0.1     # Environment variable management
+loguru==0.7.3            # Advanced logging
+pyyaml==6.0.2            # YAML configuration files
+
+# Development & Testing
+pytest==8.3.4            # Testing framework
+pytest-asyncio==0.25.2   # Async testing support
+black==24.10.0           # Code formatter
+ruff==0.8.5              # Fast Python linter
