@@ -31,11 +31,11 @@ class OllamaSettings(BaseSettings):
         description="Ollama API endpoint"
     )
     model: str = Field(
-        default="llama3:latest",
+        default="llama3.2:latest",
         description="Model to use for inference"
     )
     temperature: float = Field(
-        default=0.3,
+        default=0.7,
         ge=0.0,
         le=2.0,
         description="Sampling temperature (0=deterministic, 2=creative)"
@@ -80,6 +80,13 @@ class Settings(BaseSettings):
     # Application settings
     environment: Literal["development", "production", "test"] = "development"
     log_level: str = Field(default="INFO")
+    
+    # Job Search API (RapidAPI)
+    rapidapi_key: str = Field(default="", description="RapidAPI key for JSearch")
+    rapidapi_host: str = Field(
+        default="jsearch.p.rapidapi.com",
+        description="RapidAPI host for JSearch"
+    )
     
     # Nested configuration sections
     ollama: OllamaSettings = Field(default_factory=OllamaSettings)
