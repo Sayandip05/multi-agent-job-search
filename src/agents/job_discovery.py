@@ -18,7 +18,7 @@ import json
 
 from ..config.settings import settings
 from ..models.domain import CandidateProfile, JobPosting, ExperienceLevel
-from ..tools.job_search_tool import JobSearchTool, search_jobs_for_candidate
+from ..tools.job_search_tools import JobSearchTool, search_jobs_for_candidate
 
 
 def create_ollama_llm() -> LLM:

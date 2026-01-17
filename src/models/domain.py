@@ -40,6 +40,8 @@ class SkillCategory(str, Enum):
     SOFT_SKILL = "soft_skill"
     DOMAIN_KNOWLEDGE = "domain_knowledge"
     DATABASE = "database"
+    CLOUD = "cloud"
+    DEVOPS = "devops"
 
 
 class Skill(BaseModel):
