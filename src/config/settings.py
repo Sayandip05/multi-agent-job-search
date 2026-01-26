@@ -112,16 +112,3 @@ class Settings(BaseSettings):
 # Singleton instance - import this throughout the application
 settings = Settings()
 
-
-# Example usage and testing function
-if __name__ == "__main__":
-    """
-    This allows you to test configuration loading:
-    python src/config/settings.py
-    """
-    print("🔧 Configuration Loaded Successfully!")
-    print(f"Environment: {settings.environment}")
-    print(f"Ollama URL: {settings.ollama.base_url}")
-    print(f"Ollama Model: {settings.ollama.model}")
-    print(f"Agent Verbose: {settings.agent.verbose}")
-    print(f"Log Level: {settings.log_level}")
