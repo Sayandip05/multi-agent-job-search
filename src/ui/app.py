@@ -117,8 +117,12 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# Progress bar (cap at 1.0)
-progress = min((st.session_state.step - 1) / total_steps, 1.0)
+# Progress bar
+if st.session_state.step == 7:
+    progress = 1.0
+else:
+    progress = min((st.session_state.step - 1) / 5, 0.95)  # Scale to 5 form steps
+    
 st.progress(progress)
 
 st.markdown("---")
@@ -293,68 +297,79 @@ elif st.session_state.step == 5:
             if not uploaded_file:
                 st.error("⚠️ Please upload your resume")
             else:
-                # Extract resume text
-                with st.spinner("📄 Extracting text from resume..."):
-                    try:
-                        resume_text = extract_resume_text(uploaded_file, uploaded_file.name)
-                        st.session_state.form_data['resume_text'] = resume_text
-                        
-                        # Show processing and run the pipeline
-                        st.session_state.step = 6
-                        st.rerun()
+                # Store the uploaded file object for later processing
+                st.session_state.form_data['resume_file'] = uploaded_file
+                st.session_state.step = 6
+                st.rerun()
                     
-                    except Exception as e:
-                        st.error(f"❌ Failed to process resume: {str(e)}")
-
-
-# ========== STEP 6: Processing ==========
+                    
+# ========== STEP 6: AI Analysis ==========
 elif st.session_state.step == 6:
-    st.header("⚙️ Processing Your Application")
+    st.header("🤖 AI Analysis in Progress")
+    st.info("Our team of AI agents is analyzing your profile and searching for jobs...")
     
-    # Create progress placeholders
-    progress_text = st.empty()
-    progress_bar = st.empty()
+    # Progress bar for analysis steps
+    progress_bar = st.progress(0)
     status_text = st.empty()
     
     try:
-        # Initialize storage
-        storage = CandidateStorage()
+        # Get uploaded resume file
+        resume_file = st.session_state.form_data['resume_file']
         
-        # Step 1: Analyze Resume
-        progress_text.markdown("### 📝 Step 1/4: Analyzing Resume...")
-        progress_bar.progress(0.25)
+        # Read file content
+        if resume_file.name.endswith('.pdf'):
+            from pypdf import PdfReader
+            pdf = PdfReader(resume_file)
+            resume_text = ""
+            for page in pdf.pages:
+                resume_text += page.extract_text() + "\n"
+        else:
+            # DOCX
+            import docx
+            doc = docx.Document(resume_file)
+            resume_text = "\n".join([para.text for para in doc.paragraphs])
+            
+        # Log to debug
+        print(f"📄 Resume text length: {len(resume_text)} chars")
         
-        crew = JobSearchCrew()
-        candidate_profile = crew.analyze_resume(st.session_state.form_data['resume_text'])
-        status_text.success("✅ Resume analyzed successfully")
-        
-        # Step 2: Search Jobs
-        progress_text.markdown("### 🔍 Step 2/4: Searching Job Opportunities...")
-        progress_bar.progress(0.50)
-        
-        jobs = crew.find_jobs(
-            target_role=st.session_state.form_data['target_role'],
-            num_jobs=5
-        )
-        status_text.success(f"✅ Found {len(jobs)} job opportunities")
-        
-        # Step 3: Match Skills
-        progress_text.markdown("### 🎯 Step 3/4: Matching Skills & Analyzing Fit...")
-        progress_bar.progress(0.75)
-        
-        matches = crew.match_all_jobs()
-        status_text.success(f"✅ Analyzed {len(matches)} job matches")
-        
-        # Step 4: Rank Jobs
-        progress_text.markdown("### 🏆 Step 4/4: Ranking Opportunities...")
-        progress_bar.progress(0.90)
-        
-        ranking = crew.rank_opportunities()
-        report = crew.generate_report()
-        
+        with st.spinner('Agents are working... please wait'):
+            # Initialize Crew
+            crew = JobSearchCrew()
+            
+            # Step 1: Analyze Resume
+            status_text.text("Step 1/5: Analyzing resume...")
+            progress_bar.progress(0.2)
+            candidate_profile = crew.analyze_resume(resume_text)
+            
+            # Step 2: Find Jobs
+            status_text.text(f"Step 2/5: Searching for '{st.session_state.form_data['target_role']}' jobs...")
+            progress_bar.progress(0.4)
+            found_jobs = crew.find_jobs(
+                target_role=st.session_state.form_data['target_role'],
+                num_jobs=5
+            )
+            
+            # Step 3: Match Skills
+            status_text.text(f"Step 3/5: Matching candidate to {len(found_jobs)} jobs...")
+            progress_bar.progress(0.6)
+            crew.match_skills()
+            
+            # Step 4: Rank Jobs
+            status_text.text("Step 4/5: Ranking opportunities...")
+            progress_bar.progress(0.8)
+            ranking = crew.rank_opportunities()
+            
+            # Step 5: Report
+            status_text.text("Step 5/5: Generating final report...")
+            progress_bar.progress(0.9)
+            report = crew.generate_report()
+            
         progress_bar.progress(1.0)
         status_text.success("✅ Analysis complete!")
         
+        # Initialize storage
+        storage = CandidateStorage()
+
         # Save to CSV
         storage.save_candidate(
             full_name=st.session_state.form_data['full_name'],
