@@ -12,12 +12,28 @@ Why a Custom Tool?
 """
 
 import requests
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Type
 from crewai.tools import BaseTool
-from pydantic import Field
+from pydantic import BaseModel, Field
 
 from ..config.settings import settings
 from ..models.domain import JobPosting, ExperienceLevel
+
+
+class JobSearchToolSchema(BaseModel):
+    """Schema for job search tool arguments."""
+    query: str = Field(
+        ...,
+        description="Job title or keywords to search for, e.g., 'Python Developer', 'Data Scientist'"
+    )
+    num_results: int = Field(
+        default=10,
+        description="Number of job results to return (max 10)"
+    )
+    location: Optional[str] = Field(
+        default=None,
+        description="Optional location filter, e.g., 'Remote', 'New York', 'India'"
+    )
 
 
 class JobSearchTool(BaseTool):
@@ -40,6 +56,7 @@ class JobSearchTool(BaseTool):
         "Returns a list of relevant job postings with details like title, company, "
         "description, required skills, and location."
     )
+    args_schema: Type[BaseModel] = JobSearchToolSchema
     
     def _run(
         self,

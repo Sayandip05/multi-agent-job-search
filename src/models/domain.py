@@ -55,7 +55,7 @@ class Skill(BaseModel):
     Example: Skill(name="Python", category="programming_language", years=3)
     """
     name: str = Field(description="Skill name (e.g., 'Python', 'Leadership')")
-    category: SkillCategory = Field(description="Type of skill")
+    category: str = Field(description="Type of skill")
     years_experience: Optional[float] = Field(
         default=None,
         ge=0,
@@ -65,6 +65,68 @@ class Skill(BaseModel):
         default=None,
         description="Self-assessed level: beginner, intermediate, advanced, expert"
     )
+    
+    @field_validator('category')
+    @classmethod
+    def normalize_category(cls, v: str) -> str:
+        """Map any unknown category to a valid SkillCategory value"""
+        # Get all valid category values
+        valid_categories = {cat.value for cat in SkillCategory}
+        
+        # If already valid, return as-is
+        if v in valid_categories:
+            return v
+        
+        # Normalize: replace slashes with underscores, lowercase, strip
+        normalized = v.lower().strip().replace("/", "_").replace("-", "_")
+        
+        # If normalized version is valid, return it
+        if normalized in valid_categories:
+            return normalized
+        
+        # Map common variations to valid categories
+        category_mapping = {
+            # AI/ML related -> domain_knowledge
+            "ai_machine_learning": "domain_knowledge",
+            "machine_learning": "domain_knowledge",
+            "artificial_intelligence": "domain_knowledge",
+            "ai": "domain_knowledge",
+            "ml": "domain_knowledge",
+            "data_science": "domain_knowledge",
+            "data_analytics": "domain_knowledge",
+            "nlp": "domain_knowledge",
+            "computer_vision": "domain_knowledge",
+            # Framework/Library variations
+            "framework_library": "library",
+            "frameworks_libraries": "library",
+            # Web related
+            "web_development": "framework",
+            "frontend": "framework",
+            "backend": "framework",
+            "web_framework": "framework",
+            # Tool/Platform variations
+            "tool_platform": "tool",
+            "tools_platforms": "tool",
+            # Other common ones
+            "language": "programming_language",
+            "programming": "programming_language",
+            "api": "tool",
+            "testing": "methodology",
+            "agile": "methodology",
+            "scrum": "methodology",
+            "version_control": "tool",
+            "containerization": "devops",
+            "orchestration": "devops",
+            "ci_cd": "devops",
+            "infrastructure": "cloud",
+        }
+        
+        # Check if we have a mapping
+        if normalized in category_mapping:
+            return category_mapping[normalized]
+        
+        # Default to "other" for any unknown category
+        return "other"
     
     class Config:
         # Makes model immutable - professional practice for value objects
@@ -91,10 +153,12 @@ class CandidateProfile(BaseModel):
         description="List of candidate skills"
     )
     total_years_experience: float = Field(
+        default=0.0,
         ge=0,
         description="Total years of professional experience"
     )
     experience_level: ExperienceLevel = Field(
+        default=ExperienceLevel.ENTRY,
         description="Overall seniority level"
     )
     
@@ -115,7 +179,7 @@ class CandidateProfile(BaseModel):
     )
     
     # Metadata
-    raw_resume_text: str = Field(description="Original resume text")
+    raw_resume_text: str = Field(default="", description="Original resume text")
     analyzed_at: datetime = Field(
         default_factory=datetime.utcnow,
         description="When this profile was created"
@@ -127,6 +191,30 @@ class CandidateProfile(BaseModel):
         """Business rule: A candidate must have at least one skill"""
         if not v:
             raise ValueError("Candidate must have at least one skill")
+        return v
+    
+    @field_validator('total_years_experience', mode='before')
+    @classmethod
+    def validate_years_experience(cls, v):
+        """Convert None to 0.0 for total_years_experience"""
+        if v is None:
+            return 0.0
+        return float(v)
+    
+    @field_validator('experience_level', mode='before')
+    @classmethod
+    def validate_experience_level(cls, v):
+        """Convert None to 'entry' for experience_level"""
+        if v is None:
+            return ExperienceLevel.ENTRY
+        if isinstance(v, str):
+            # Try to match the string to an enum value
+            v_lower = v.lower().strip()
+            for level in ExperienceLevel:
+                if level.value == v_lower:
+                    return level
+            # Default to entry if not found
+            return ExperienceLevel.ENTRY
         return v
 
 

@@ -93,7 +93,8 @@ def create_job_discovery_task(
     """
     # Extract key info from candidate
     skills_str = ", ".join([skill.name for skill in candidate.skills[:10]])
-    experience_str = f"{candidate.experience_level.value} ({candidate.total_years_experience} years)"
+    exp_level = candidate.experience_level.value if hasattr(candidate.experience_level, 'value') else candidate.experience_level
+    experience_str = f"{exp_level} ({candidate.total_years_experience} years)"
     
     return Task(
         description=f"""

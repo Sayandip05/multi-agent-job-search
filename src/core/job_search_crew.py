@@ -69,7 +69,7 @@ class JobSearchCrew:
             self.candidate_profile = parse_resume(resume_text)
             self.log(f"✅ Resume analyzed: {self.candidate_profile.name}")
             self.log(f"   Skills: {len(self.candidate_profile.skills)}")
-            self.log(f"   Experience: {self.candidate_profile.experience_level.value}")
+            self.log(f"   Experience: {self.candidate_profile.experience_level.value if hasattr(self.candidate_profile.experience_level, 'value') else self.candidate_profile.experience_level}")
             return self.candidate_profile
         except Exception as e:
             self.log(f"❌ Resume analysis failed: {e}")
@@ -178,7 +178,7 @@ class JobSearchCrew:
             "candidate": {
                 "name": self.candidate_profile.name,
                 "email": self.candidate_profile.email,
-                "experience_level": self.candidate_profile.experience_level.value,
+                "experience_level": self.candidate_profile.experience_level.value if hasattr(self.candidate_profile.experience_level, 'value') else str(self.candidate_profile.experience_level),
                 "total_years": self.candidate_profile.total_years_experience,
                 "skills_count": len(self.candidate_profile.skills),
                 "top_skills": [s.name for s in self.candidate_profile.skills[:5]]

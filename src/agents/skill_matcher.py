@@ -105,7 +105,7 @@ def create_skill_matching_task(
     
     # Format candidate skills for the prompt
     candidate_skills_str = "\n".join([
-        f"  - {skill.name} ({skill.category.value}): "
+        f"  - {skill.name} ({skill.category}): "
         f"{skill.years_experience or 'unspecified'} years, "
         f"{skill.proficiency or 'unspecified'} proficiency"
         for skill in candidate.skills
@@ -117,7 +117,7 @@ def create_skill_matching_task(
         
         CANDIDATE INFORMATION:
         - Name: {candidate.name}
-        - Experience Level: {candidate.experience_level.value}
+        - Experience Level: {candidate.experience_level.value if hasattr(candidate.experience_level, 'value') else candidate.experience_level}
         - Total Years: {candidate.total_years_experience}
         - Skills:
 {candidate_skills_str}
@@ -125,7 +125,7 @@ def create_skill_matching_task(
         JOB POSTING INFORMATION:
         - Title: {job.title}
         - Company: {job.company}
-        - Required Experience Level: {job.experience_level.value}
+        - Required Experience Level: {job.experience_level.value if hasattr(job.experience_level, 'value') else job.experience_level}
         - Required Skills: {', '.join(job.required_skills)}
         - Preferred Skills: {', '.join(job.preferred_skills)}
         
