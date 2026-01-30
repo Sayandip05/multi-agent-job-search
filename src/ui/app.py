@@ -109,15 +109,16 @@ st.markdown('<div class="main-header">🎯 AI Job Search Assistant</div>', unsaf
 st.markdown('<div class="sub-header">Find your perfect job match with AI-powered analysis</div>', unsafe_allow_html=True)
 
 
-# Step indicator
-total_steps = 5
+# Step indicator (7 total steps: 5 form + processing + results)
+total_steps = 7
+display_step = min(st.session_state.step, 5)  # Show max "Step 5 of 5" for user-facing steps
 st.markdown(
-    f'<div class="step-indicator">Step {st.session_state.step} of {total_steps}</div>',
+    f'<div class="step-indicator">Step {display_step} of 5</div>',
     unsafe_allow_html=True
 )
 
-# Progress bar
-progress = (st.session_state.step - 1) / total_steps
+# Progress bar (cap at 1.0)
+progress = min((st.session_state.step - 1) / total_steps, 1.0)
 st.progress(progress)
 
 st.markdown("---")
@@ -434,27 +435,42 @@ elif st.session_state.step == 7:
     st.markdown("### 📋 Ranked Job Opportunities")
     
     for job in report['ranked_opportunities']:
-        tier_class = f"tier-{job['tier'].split()[1]}"
+        tier = job['tier'].split()[1] if ' ' in job['tier'] else '2'
         
-        with st.container():
-            st.markdown(f'<div class="job-card {tier_class}">', unsafe_allow_html=True)
-            
-            col1, col2 = st.columns([3, 1])
-            
-            with col1:
-                st.markdown(f"### #{job['rank']} - {job['job_title']}")
-                st.markdown(f"**Company:** {job['company']}")
-                st.markdown(f"**{job['tier']}** | Score: **{job['final_score']}/100**")
-            
-            with col2:
-                st.markdown(f"**Action:**")
-                st.markdown(f"{job['action_recommendation']}")
-            
-            with st.expander("📝 View Details"):
-                st.markdown(f"**Why this rank:**")
-                st.write(job['ranking_rationale'])
-            
-            st.markdown('</div>', unsafe_allow_html=True)
+        # Use colored border based on tier
+        border_colors = {'1': '#28a745', '2': '#17a2b8', '3': '#ffc107', '4': '#6c757d'}
+        border_color = border_colors.get(tier, '#17a2b8')
+        
+        # Create job card with inline styling
+        st.markdown(
+            f"""
+            <div style="
+                border: 2px solid #333;
+                border-left: 5px solid {border_color};
+                border-radius: 10px;
+                padding: 1.5rem;
+                margin-bottom: 1rem;
+                background-color: rgba(255,255,255,0.05);
+            ">
+                <div style="display: flex; justify-content: space-between; align-items: start;">
+                    <div>
+                        <h3 style="margin: 0;">#{job['rank']} - {job['job_title']}</h3>
+                        <p><strong>Company:</strong> {job['company']}</p>
+                        <p><strong>{job['tier']}</strong> | Score: <strong>{job['final_score']}/100</strong></p>
+                    </div>
+                    <div style="text-align: right;">
+                        <p><strong>Action:</strong></p>
+                        <p style="color: {border_color}; font-weight: bold;">{job['action_recommendation']}</p>
+                    </div>
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+        
+        with st.expander(f"📝 View Details - {job['job_title']}"):
+            st.markdown(f"**Why this rank:**")
+            st.write(job['ranking_rationale'])
     
     st.markdown("---")
     
