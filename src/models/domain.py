@@ -216,6 +216,29 @@ class CandidateProfile(BaseModel):
             # Default to entry if not found
             return ExperienceLevel.ENTRY
         return v
+    
+    @field_validator('education', mode='before')
+    @classmethod
+    def flatten_education(cls, v):
+        """Convert complex education objects to strings"""
+        if not v:
+            return []
+        
+        cleaned_edu = []
+        for item in v:
+            if isinstance(item, dict):
+                # Flatten dict to string: "Degree - University (Year)"
+                parts = []
+                if 'degree' in item: parts.append(item['degree'])
+                if 'university' in item: parts.append(item['university'])
+                if 'institution' in item: parts.append(item['institution'])
+                if 'year' in item: parts.append(str(item['year']))
+                if 'expected_graduation' in item: parts.append(f"Exp {item['expected_graduation']}")
+                
+                cleaned_edu.append(" - ".join(parts))
+            else:
+                cleaned_edu.append(str(item))
+        return cleaned_edu
 
 
 class JobPosting(BaseModel):
