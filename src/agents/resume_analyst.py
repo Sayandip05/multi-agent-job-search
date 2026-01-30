@@ -162,8 +162,7 @@ def create_resume_analysis_task(
             "experience_level": "entry|junior|mid|senior|lead|principal",
             "previous_roles": ["role1", "role2"],
             "previous_companies": ["company1", "company2"],
-            "education": ["degree1", "degree2"],
-            "raw_resume_text": "original resume text"
+            "education": ["degree1", "degree2"]
         }}
         
         IMPORTANT:
@@ -237,12 +236,20 @@ def parse_resume(resume_text: str) -> CandidateProfile:
         json_match = re.search(r'\{[\s\S]*\}', result_str)
         if json_match:
             json_str = json_match.group()
+            
+            # Attempt to repair common JSON errors
+            json_str = repair_json(json_str)
+            
             parsed_data = json.loads(json_str)
         else:
             raise ValueError("No JSON object found in agent output")
         
         # Step 6: Create and validate the CandidateProfile
         # This is where our Pydantic models shine - automatic validation!
+        
+        # Manually inject the raw resume text (we didn't ask LLM to output it to avoid JSON errors)
+        parsed_data['raw_resume_text'] = resume_text
+        
         candidate_profile = CandidateProfile(**parsed_data)
         
         return candidate_profile
@@ -251,4 +258,42 @@ def parse_resume(resume_text: str) -> CandidateProfile:
         raise ValueError(f"Agent output was not valid JSON: {e}")
     except Exception as e:
         raise ValueError(f"Failed to create CandidateProfile from agent output: {e}")
+
+
+def repair_json(json_str: str) -> str:
+    """
+    Attempt to repair common JSON errors from LLM output.
+    
+    Common issues:
+    - Trailing commas before ] or }
+    - Unescaped newlines in strings
+    - Single quotes instead of double quotes
+    - Missing quotes around keys
+    """
+    import re
+    
+    # Remove any markdown code block markers
+    json_str = re.sub(r'^```json\s*', '', json_str, flags=re.MULTILINE)
+    json_str = re.sub(r'^```\s*$', '', json_str, flags=re.MULTILINE)
+    json_str = json_str.strip()
+    
+    # Fix trailing commas before ] or }
+    json_str = re.sub(r',\s*([}\]])', r'\1', json_str)
+    
+    # Fix missing commas between array elements or object properties
+    # Pattern: "value"[whitespace]"key" -> "value", "key"
+    json_str = re.sub(r'(")\s*\n\s*(")', r'\1,\n\2', json_str)
+    
+    # Fix unescaped newlines inside strings (replace with \n)
+    # This is tricky - we need to be careful not to break valid JSON
+    # Simple approach: replace actual newlines that appear mid-string
+    
+    # Replace tabs with spaces
+    json_str = json_str.replace('\t', ' ')
+    
+    # Try to fix unquoted keys (common with some LLMs)
+    # Pattern: { key: "value" -> { "key": "value"
+    json_str = re.sub(r'([{,]\s*)([a-zA-Z_][a-zA-Z0-9_]*)\s*:', r'\1"\2":', json_str)
+    
+    return json_str
 

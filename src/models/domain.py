@@ -227,15 +227,32 @@ class CandidateProfile(BaseModel):
         cleaned_edu = []
         for item in v:
             if isinstance(item, dict):
-                # Flatten dict to string: "Degree - University (Year)"
-                parts = []
-                if 'degree' in item: parts.append(item['degree'])
-                if 'university' in item: parts.append(item['university'])
-                if 'institution' in item: parts.append(item['institution'])
-                if 'year' in item: parts.append(str(item['year']))
-                if 'expected_graduation' in item: parts.append(f"Exp {item['expected_graduation']}")
+                # Handle any dictionary format by extracting meaningful values
+                # Priority order for common keys
+                priority_keys = ['degree', 'name', 'title', 'field', 'major', 
+                                'university', 'institution', 'school', 'college',
+                                'year', 'graduation_year', 'expected_graduation']
                 
-                cleaned_edu.append(" - ".join(parts))
+                parts = []
+                used_keys = set()
+                
+                # First, extract priority keys in order
+                for key in priority_keys:
+                    if key in item and item[key]:
+                        val = item[key]
+                        if key in ['year', 'graduation_year', 'expected_graduation']:
+                            parts.append(str(val))
+                        else:
+                            parts.append(str(val))
+                        used_keys.add(key)
+                
+                # If no priority keys found, just join all string values
+                if not parts:
+                    for k, val in item.items():
+                        if k not in ['category', 'type'] and val:  # Skip meta keys
+                            parts.append(str(val))
+                
+                cleaned_edu.append(" - ".join(parts) if parts else "Unknown Education")
             else:
                 cleaned_edu.append(str(item))
         return cleaned_edu
