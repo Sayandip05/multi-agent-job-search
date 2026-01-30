@@ -153,7 +153,7 @@ def create_resume_analysis_task(
             "skills": [
                 {{
                     "name": "skill name",
-                    "category": "programming_language|framework|tool|soft_skill|domain_knowledge",
+                    "category": "programming_language|framework|library|tool|platform|soft_skill|domain_knowledge|database|cloud|devops|methodology|other",
                     "years_experience": number or null,
                     "proficiency": "beginner|intermediate|advanced|expert or null"
                 }}

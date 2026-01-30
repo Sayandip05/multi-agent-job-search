@@ -27,6 +27,14 @@ st.set_page_config(
 # Custom CSS
 st.markdown("""
 <style>
+    /* Add horizontal padding to main content area */
+    .block-container {
+        padding-left: 5rem !important;
+        padding-right: 5rem !important;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+    
     .main-header {
         font-size: 3rem;
         font-weight: bold;

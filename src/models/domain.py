@@ -36,12 +36,16 @@ class SkillCategory(str, Enum):
     """Categories for organizing skills"""
     PROGRAMMING_LANGUAGE = "programming_language"
     FRAMEWORK = "framework"
+    LIBRARY = "library"
     TOOL = "tool"
+    PLATFORM = "platform"
     SOFT_SKILL = "soft_skill"
     DOMAIN_KNOWLEDGE = "domain_knowledge"
     DATABASE = "database"
     CLOUD = "cloud"
     DEVOPS = "devops"
+    METHODOLOGY = "methodology"
+    OTHER = "other"
 
 
 class Skill(BaseModel):
