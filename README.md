@@ -32,6 +32,8 @@
 
 This project implements an intelligent job search assistant using a **multi-agent AI system**. Upload your resume, specify your target role, and let specialized AI agents analyze your profile, search for job opportunities, match your skills, and rank the best opportunities for you.
 
+![Job Search Assistant Demo](assets/demo_result.png)
+
 ### Why Multi-Agent?
 
 Traditional job search tools use simple keyword matching. Our system uses **four specialized AI agents** that work together like a team of career advisors:
@@ -50,6 +52,7 @@ Traditional job search tools use simple keyword matching. Our system uses **four
 | 📄 **Smart Resume Parsing** | AI extracts skills, experience, education, and qualifications from PDF/DOCX resumes |
 | 🔍 **Real Job Discovery** | Searches live job postings using JSearch API with intelligent query building |
 | 🎯 **Deep Skill Matching** | Compares your profile against job requirements with detailed gap analysis |
+| ⚡ **Batch Processing** | **NEW!** Optimizes performance by processing multiple jobs in a single AI call |
 | 🏆 **Strategic Ranking** | Ranks opportunities based on fit score, growth potential, and career alignment |
 | 💾 **Data Persistence** | Saves candidate profiles and search results to CSV for future reference |
 | 🖥️ **Beautiful UI** | Modern, responsive Streamlit interface with step-by-step workflow |
@@ -75,6 +78,7 @@ Traditional job search tools use simple keyword matching. Our system uses **four
 │    experience  │    listings    │    analysis    │  • Strategic     │
 │  • Identify    │  • Normalize   │  • Fit score   │    ranking       │
 │    education   │    data        │    (0-100)     │  • Action plan   │
+│                │                │  (Batch Mode)  │                  │
 ├────────────────┴────────────────┴────────────────┴──────────────────┤
 │                      CREWAI + LANGCHAIN-OLLAMA                       │
 │              Agent framework • Task definitions • Memory             │
@@ -181,7 +185,7 @@ ollama serve
 streamlit run frontend/app.py
 ```
 
-Open your browser at **http://localhost:8501**
+Open your browser at **http://localhost:8501** (or the port shown in your terminal).
 
 ### Step-by-Step Workflow
 
@@ -334,6 +338,7 @@ RAPIDAPI_HOST=jsearch.p.rapidapi.com
 - Identify skill gaps and potential
 - Calculate weighted fit score (0-100)
 - Assess experience alignment
+- **New!** Batch processing for high-speed performance
 
 **Output:** `JobMatchResult` with scores and gap analysis
 
@@ -401,7 +406,7 @@ Contributions are welcome! Please follow these steps:
 
 ```bash
 # Fork and clone
-git clone https://github.com/YOUR_USERNAME/multi-agent-job-search.git
+git clone https://github.com/Sayandip05/multi-agent-job-search.git
 cd multi-agent-job-search
 
 # Install dev dependencies
