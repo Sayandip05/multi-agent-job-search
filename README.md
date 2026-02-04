@@ -178,7 +178,7 @@ ollama list
 ollama serve
 
 # Start the Streamlit application
-streamlit run src/ui/app.py
+streamlit run frontend/app.py
 ```
 
 Open your browser at **http://localhost:8501**
@@ -238,10 +238,9 @@ multi-agent-job-search/
 │   │   ├── __init__.py
 │   │   ├── file_parser.py          # PDF/DOCX text extraction
 │   │   └── csv_storage.py          # Data persistence layer
-│   │
-│   └── 📂 ui/                      # User interface
-│       ├── __init__.py
-│       └── app.py                  # Streamlit application
+│
+├── 📂 frontend/                    # User interface
+│   └── app.py                      # Streamlit application
 │
 ├── 📂 data/                        # Generated data (auto-created)
 │   ├── candidates.csv              # Saved candidate profiles
